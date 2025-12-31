@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface StatItem {
     label: string;
     value: string;
@@ -42,4 +44,9 @@ export interface StatItem {
     title: string;
     enTitle: string;
     description: string;
+  }
+
+  export interface FAQItem {
+    question: string;
+    answer: React.ReactNode;
   }

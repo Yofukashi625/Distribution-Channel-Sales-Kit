@@ -1,18 +1,22 @@
+
 import React from 'react';
 import { FangYangLogo } from '../constants';
 
 const Footer: React.FC = () => {
     return (
-        <footer className="bg-slate-900 text-white py-12">
-            <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
-                <div className="mb-6 md:mb-0">
-                    <FangYangLogo className="w-32 h-auto grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300" />
-                    <p className="text-slate-500 mt-4 text-sm">© 2025 FangYang Global Education. All rights reserved.</p>
-                </div>
-                <div className="flex gap-6">
-                    <a href="#" className="text-slate-400 hover:text-white transition-colors">關於我們</a>
-                    <a href="#" className="text-slate-400 hover:text-white transition-colors">聯絡資訊</a>
-                    <a href="#" className="text-slate-400 hover:text-white transition-colors">隱私權政策</a>
+        <footer className="bg-slate-900 text-white py-16">
+            <div className="container mx-auto px-6">
+                <div className="flex flex-col items-center text-center">
+                    {/* Logo 與 品牌文字組合 */}
+                    <div className="flex items-center gap-4 mb-8 group cursor-default">
+                        <FangYangLogo className="w-16 h-auto brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-500" />
+                        <span className="text-2xl font-black tracking-widest text-white">放洋留遊學</span>
+                    </div>
+                    
+                    {/* 版權聲明置中 */}
+                    <p className="text-slate-500 text-sm font-medium">
+                        © 2025 FangYang Global Education. All rights reserved.
+                    </p>
                 </div>
             </div>
         </footer>

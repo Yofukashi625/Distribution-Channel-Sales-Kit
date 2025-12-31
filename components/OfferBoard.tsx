@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Award, MapPin } from 'lucide-react';
 import { OFFER_BOARD_DATA } from '../constants';
 
 interface OfferBoardProps {
@@ -27,52 +28,102 @@ const OfferBoard: React.FC<OfferBoardProps> = ({ isOpen, onClose }) => {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 h-[85vh] bg-white rounded-t-[3rem] z-[70] shadow-2xl flex flex-col overflow-hidden"
+            transition={{ type: "spring", damping: 30, stiffness: 250 }}
+            className="fixed bottom-0 left-0 right-0 h-[90vh] bg-white rounded-t-[3rem] z-[70] shadow-2xl flex flex-col overflow-hidden"
           >
-            {/* Header */}
-            <div className="p-8 pb-4 flex justify-between items-center border-b border-slate-100 sticky top-0 bg-white z-10">
-              <div>
-                <h2 className="text-3xl font-black text-slate-900">2024-2025 完整榜單</h2>
-                <p className="text-slate-500 font-medium">見證放洋學員邁向世界舞台的足跡</p>
+            {/* Header - Compacted height and shrunk typography */}
+            <div className="px-6 py-4 flex justify-between items-center border-b border-slate-100 sticky top-0 bg-white z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-[#F7005A] rounded-xl flex items-center justify-center text-white shadow-md shrink-0">
+                  <Award size={20} />
+                </div>
+                <div className="flex flex-col justify-center">
+                  <h2 className="text-lg md:text-xl font-black text-slate-900 tracking-tight leading-none mb-1">2025 入學完整錄取榜單</h2>
+                  <p className="text-slate-500 font-bold text-[10px] md:text-xs leading-none">放洋學員全球頂尖名校錄取紀錄匯整</p>
+                </div>
               </div>
               <button 
                 onClick={onClose}
-                className="w-12 h-12 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors shadow-sm"
               >
-                <X size={24} />
+                <X size={18} />
               </button>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-8 space-y-12 no-scrollbar">
-              {OFFER_BOARD_DATA.map((group, idx) => (
-                <div key={idx} className="space-y-6">
-                  <h3 className="text-2xl font-bold text-[#F7005A] sticky top-0 bg-white py-2 z-10">
-                    {group.category}
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {group.items.map((item, i) => (
-                      <motion.div 
-                        key={i}
-                        whileHover={{ y: -4 }}
-                        className="bg-slate-50 rounded-2xl p-6 border border-slate-100 hover:shadow-md transition-all"
-                      >
-                        <div className="flex justify-between items-start mb-4">
-                          <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">{item.rank}</span>
-                          <span className="px-2 py-1 bg-pink-100 text-pink-600 rounded text-[10px] font-bold">Offer!</span>
+            <div className="flex-1 overflow-y-auto p-8 no-scrollbar bg-slate-50">
+              <div className="max-w-7xl mx-auto space-y-16 pb-12">
+                {OFFER_BOARD_DATA.map((group, idx) => (
+                  <motion.div 
+                    key={idx} 
+                    className="space-y-6"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + idx * 0.1 }}
+                  >
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-1.5 h-8 bg-[#F7005A] rounded-full" />
+                      <h3 className="text-2xl font-black text-slate-800">
+                        {group.category}
+                      </h3>
+                    </div>
+                    
+                    {/* List/Table Header */}
+                    <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-slate-200/50 rounded-t-xl text-slate-500 text-sm font-bold uppercase tracking-wider">
+                      <div className="col-span-2">錄取生背景</div>
+                      <div className="col-span-1">排名指標</div>
+                      <div className="col-span-4">錄取學校</div>
+                      <div className="col-span-5">申請系所 / 專業</div>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 divide-y divide-slate-100">
+                      {group.items.map((item, i) => (
+                        <div 
+                          key={i}
+                          className="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 items-center hover:bg-slate-50 transition-colors group"
+                        >
+                          {/* Student Background */}
+                          <div className="col-span-1 md:col-span-2">
+                            <div className="flex items-center gap-2">
+                              <span className="md:hidden text-xs font-bold text-slate-400">背景：</span>
+                              <span className="font-bold text-slate-700 text-sm">{item.student}</span>
+                            </div>
+                          </div>
+
+                          {/* Ranking */}
+                          <div className="col-span-1 md:col-span-1">
+                            <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black whitespace-nowrap ${
+                              item.rank.startsWith('US') ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                            }`}>
+                              {item.rank}
+                            </span>
+                          </div>
+
+                          {/* School */}
+                          <div className="col-span-1 md:col-span-4">
+                            <div className="flex items-center gap-2">
+                              <MapPin size={14} className="text-[#F7005A] shrink-0" />
+                              <span className="text-base font-black text-slate-800 leading-tight group-hover:text-[#F7005A] transition-colors">
+                                {item.school}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Major */}
+                          <div className="col-span-1 md:col-span-5">
+                            <div className="flex flex-col">
+                              <span className="md:hidden text-xs font-bold text-slate-400">系所：</span>
+                              <span className="text-sm font-bold text-slate-600 leading-snug" title={item.major}>
+                                {item.major}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <h4 className="text-lg font-black text-slate-800 mb-1 leading-tight">{item.school}</h4>
-                        <p className="text-sm font-bold text-slate-500 mb-4">{item.major}</p>
-                        <div className="pt-4 border-t border-slate-200 text-xs font-medium text-slate-400">
-                          錄取生背景：{item.student}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
             {/* Footer gradient fade */}

@@ -16,6 +16,10 @@ const Analysis: React.FC = () => {
             viewport={{ once: true }}
             className="mb-16 max-w-2xl"
         >
+          {/* Section Accent Label */}
+          <span className="inline-block text-[#F7005A] text-sm font-black tracking-[0.2em] uppercase mb-4 opacity-80">
+            Our Process
+          </span>
           <h2 className="text-4xl md:text-5xl font-black mb-6">
             落點分析流程化<br />
             更有效地梳理學生需求
@@ -34,12 +38,13 @@ const Analysis: React.FC = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white border border-slate-200 p-8 rounded-2xl hover:border-[#F7005A] transition-all duration-300 group shadow-lg"
+              className="bg-white border border-slate-200 p-8 rounded-2xl hover:border-[#F7005A] transition-all duration-300 group shadow-lg flex flex-col h-full"
             >
               <div className="flex items-center justify-between mb-4">
                 <span className="text-sm font-bold text-[#F7005A] tracking-wider uppercase">Stage {stage.id}</span>
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-800 group-hover:bg-[#F7005A] group-hover:text-white transition-colors">
-                  {stage.id}
+                {/* Changed from Number to Icon */}
+                <div className="text-slate-300 group-hover:text-[#F7005A] transition-all duration-300 transform group-hover:scale-110">
+                  {stage.icon}
                 </div>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-slate-800 group-hover:text-[#F7005A] transition-colors">{stage.title}</h3>
