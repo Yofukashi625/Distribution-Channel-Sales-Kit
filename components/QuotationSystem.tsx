@@ -1,7 +1,6 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calculator, Download, Check, Minus, Plus, Tag, User, FileText, Globe } from 'lucide-react';
+import { X, Calculator, Download, Check, Minus, Plus, Tag, User, FileText, Globe, RefreshCw } from 'lucide-react';
 import { PRICING_DATA, FangYangLogo } from '../constants';
 import { toPng } from 'html-to-image';
 
@@ -16,6 +15,7 @@ const QuotationSystem: React.FC<QuotationSystemProps> = ({ isOpen, onClose }) =>
   const [discountCode, setDiscountCode] = useState('');
   const [consultantName, setConsultantName] = useState('');
   const [clientName, setClientName] = useState('');
+  const [isDownloading, setIsDownloading] = useState(false);
   
   const [extraSchools, setExtraSchools] = useState(0);
   const [topTierAdd, setTopTierAdd] = useState(0);
@@ -56,51 +56,40 @@ const QuotationSystem: React.FC<QuotationSystemProps> = ({ isOpen, onClose }) =>
 
   /**
    * Optimized Download Logic
-   * Fixed title, text wrapping, and strictly cropped right-side white space for perfect symmetry.
+   * Fixes 'cssRules' error by ensuring index.html has crossorigin on fonts.
+   * Forces explicit styles during capture to ensure 900 weight and alignment.
    */
   const handleDownload = async () => {
     const el = quotationRef.current;
-    if (!el) return;
+    if (!el || isDownloading) return;
     
+    setIsDownloading(true);
     try {
       await document.fonts.ready;
-      
-      let fullStyles = '';
-      try {
-        const styleSheets = Array.from(document.styleSheets);
-        for (const sheet of styleSheets) {
-          try {
-            const rules = Array.from(sheet.cssRules || sheet.rules);
-            for (const rule of rules) {
-              fullStyles += rule.cssText;
-            }
-          } catch (e) {}
-        }
-      } catch (err) {}
+      // 增加緩衝時間確保字體加載完成
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Narrowed width to 480px to tightly crop the right-side white space as requested.
-      const exportWidth = 480;
-      const exportHeight = el.scrollHeight;
+      const captureWidth = el.offsetWidth;
+      const captureHeight = el.scrollHeight;
 
+      // html-to-image 不需要 onclone，我們直接在匯出時指定 style
       const dataUrl = await toPng(el, {
-        width: exportWidth,
-        height: exportHeight,
+        width: captureWidth,
+        height: captureHeight,
         pixelRatio: 3, 
         backgroundColor: '#ffffff',
         cacheBust: true,
-        skipFonts: false,
-        fontEmbedCSS: fullStyles,
         style: {
-          width: `${exportWidth}px`,
-          height: `${exportHeight}px`,
+          width: `${captureWidth}px`,
+          height: `${captureHeight}px`,
           margin: '0',
-          padding: '40px', // Maintained for consistent left/top/bottom margins
+          padding: '40px', 
+          boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'stretch',
           justifyContent: 'flex-start',
           transform: 'none',
-          boxSizing: 'border-box'
         }
       });
       
@@ -113,7 +102,9 @@ const QuotationSystem: React.FC<QuotationSystemProps> = ({ isOpen, onClose }) =>
       
     } catch (err) {
       console.error('PNG generation failed:', err);
-      alert('產生報價單圖檔失敗，請確認使用最新版 Chrome 瀏覽器並重試。');
+      alert('產生報價單圖檔失敗。請檢查您的網路連線，或嘗試使用最新版 Chrome 瀏覽器。');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -139,7 +130,7 @@ const QuotationSystem: React.FC<QuotationSystemProps> = ({ isOpen, onClose }) =>
                   <Calculator size={24} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-slate-800">顧問報價系統</h2>
+                  <h2 className="text-2xl font-black text-slate-800" style={{ fontWeight: 900 }}>顧問報價系統</h2>
                   <p className="text-sm text-slate-400 font-bold uppercase tracking-wider">FangYang Quotation Tool</p>
                 </div>
               </div>
@@ -298,7 +289,7 @@ const QuotationSystem: React.FC<QuotationSystemProps> = ({ isOpen, onClose }) =>
                       </div>
 
                       <div className="mt-4">
-                        <h1 className="text-3xl font-black text-slate-900 mb-2">放洋留遊學專屬規劃報價單</h1>
+                        <h1 className="text-3xl font-black text-slate-900 mb-2" style={{ fontWeight: 900 }}>放洋留遊學專屬規劃報價單</h1>
                         <div className="flex gap-10 border-b border-slate-100 pb-4">
                            <div><span className="text-[10px] text-slate-400 font-bold block">CLIENT</span><span className="font-black text-slate-700">{clientName || '---'}</span></div>
                            <div><span className="text-[10px] text-slate-400 font-bold block">CONSULTANT</span><span className="font-black text-slate-700">{consultantName || '---'}</span></div>
@@ -310,7 +301,7 @@ const QuotationSystem: React.FC<QuotationSystemProps> = ({ isOpen, onClose }) =>
                         <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl">
                           <div className="flex items-center gap-3 overflow-hidden">
                             <span className="w-2 h-8 bg-[#F7005A] rounded-full flex-shrink-0" />
-                            <span className="text-xl font-black text-slate-800 whitespace-nowrap">{activePackage.name}方案 ( {activePackage.schools} 所 )</span>
+                            <span className="text-xl font-black text-slate-800 whitespace-nowrap" style={{ fontWeight: 900 }}>{activePackage.name}方案 ( {activePackage.schools} 所 )</span>
                           </div>
                           <span className="font-black text-slate-700 whitespace-nowrap ml-2 flex-shrink-0">NT$ {activePackage.price.toLocaleString()}</span>
                         </div>
@@ -339,49 +330,48 @@ const QuotationSystem: React.FC<QuotationSystemProps> = ({ isOpen, onClose }) =>
                           <div className="mt-8 space-y-3">
                             <h4 className="text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-slate-50 pb-1">加購項目 Add-ons</h4>
                             {extraMajorCount > 0 && (
-                              <div className="flex justify-between text-xs font-bold text-slate-600">
-                                <span>選校表加購 ({extraMajorCount} 組)</span>
-                                <span className="whitespace-nowrap ml-4">NT$ {(extraMajorCount * 7000).toLocaleString()}</span>
+                              <div className="flex justify-between items-center text-xs font-bold text-slate-600">
+                                <div className="flex-grow">選校表加購 ({extraMajorCount} 組)</div>
+                                <div className="min-w-[120px] text-right font-black" style={{ fontWeight: 900 }}>NT$ {(extraMajorCount * 7000).toLocaleString()}</div>
                               </div>
                             )}
                             {extraSchools > 0 && (
-                              <div className="flex justify-between text-xs font-bold text-slate-600">
-                                <span>額外申請 ({extraSchools} 間)</span>
-                                <span className="whitespace-nowrap ml-4">NT$ {(extraSchools * (activePackage.id === 'standard' || activePackage.id === 'basic' ? (region === 'US' ? 11000 : 7000) : (region === 'US' ? 13000 : 10000))).toLocaleString()}</span>
+                              <div className="flex justify-between items-center text-xs font-bold text-slate-600">
+                                <div className="flex-grow">額外申請 ({extraSchools} 間)</div>
+                                <div className="min-w-[120px] text-right font-black" style={{ fontWeight: 900 }}>NT$ {(extraSchools * (activePackage.id === 'standard' || activePackage.id === 'basic' ? (region === 'US' ? 11000 : 7000) : (region === 'US' ? 13000 : 10000))).toLocaleString()}</div>
                               </div>
                             )}
                             {topTierAdd > 0 && (
-                              <div className="flex justify-between text-xs font-bold text-slate-600">
-                                <span>頂尖大學加購 ({topTierAdd} 間)</span>
-                                <span className="whitespace-nowrap ml-4">NT$ {(topTierAdd * (PRICING_DATA.addons.topTier as any)[`${region}_Add`]).toLocaleString()}</span>
+                              <div className="flex justify-between items-center text-xs font-bold text-slate-600">
+                                <div className="flex-grow">頂尖大學加購 ({topTierAdd} 間)</div>
+                                <div className="min-w-[120px] text-right font-black" style={{ fontWeight: 900 }}>NT$ {(topTierAdd * (PRICING_DATA.addons.topTier as any)[`${region}_Add`]).toLocaleString()}</div>
                               </div>
                             )}
                             {topTierSwap > 0 && (
-                              <div className="flex justify-between text-xs font-bold text-slate-600">
-                                <span>頂尖大學換購 ({topTierSwap} 間)</span>
-                                <span className="whitespace-nowrap ml-4">NT$ {(topTierSwap * (PRICING_DATA.addons.topTier as any)[`${region}_Swap`]).toLocaleString()}</span>
+                              <div className="flex justify-between items-center text-xs font-bold text-slate-600">
+                                <div className="flex-grow">頂尖大學換購 ({topTierSwap} 間)</div>
+                                <div className="min-w-[120px] text-right font-black" style={{ fontWeight: 900 }}>NT$ {(topTierSwap * (PRICING_DATA.addons.topTier as any)[`${region}_Swap`]).toLocaleString()}</div>
                               </div>
                             )}
                           </div>
                         )}
                       </div>
 
-                      <div className="bg-slate-900 rounded-3xl p-8 text-white mt-auto">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-slate-400 font-bold text-sm">小計 Subtotal</span>
-                          <span className="font-bold text-sm whitespace-nowrap">NT$ {(totalCalculation.base + totalCalculation.addonsTotal).toLocaleString()}</span>
+                      {/* 結算區域：精準右側邊界對齊 */}
+                      <div className="bg-slate-900 rounded-3xl p-8 text-white mt-auto overflow-hidden">
+                        <div className="flex justify-between items-center mb-3">
+                          <div className="text-slate-400 font-bold text-sm flex-grow">小計 Subtotal</div>
+                          <div className="min-w-[180px] text-right font-black text-sm whitespace-nowrap" style={{ fontWeight: 900, textAlign: 'right' }}>NT$ {(totalCalculation.base + totalCalculation.addonsTotal).toLocaleString()}</div>
                         </div>
                         {totalCalculation.discount > 0 && (
-                          <div className="flex justify-between items-center mb-6 text-pink-400">
-                            <span className="font-bold text-sm">顧問折扣 Discount</span>
-                            <span className="font-bold text-sm whitespace-nowrap ml-4 flex-shrink-0">- NT$ {totalCalculation.discount.toLocaleString()}</span>
+                          <div className="flex justify-between items-center mb-6 text-green-400">
+                            <div className="font-bold text-sm flex-grow">顧問折扣 Discount</div>
+                            <div className="min-w-[180px] text-right font-black text-sm whitespace-nowrap" style={{ fontWeight: 900, textAlign: 'right' }}>- NT$ {totalCalculation.discount.toLocaleString()}</div>
                           </div>
                         )}
-                        <div className="flex justify-between items-end border-t border-white/10 pt-6">
-                           <span className="text-xl font-black">應付金額 TOTAL</span>
-                           <div className="text-right flex-shrink-0 ml-4">
-                              <span className="text-3xl font-black text-[#FF4B7D] whitespace-nowrap">NT$ {totalCalculation.grandTotal.toLocaleString()}</span>
-                           </div>
+                        <div className="flex justify-between items-center border-t border-white/10 pt-6">
+                           <div className="text-xl font-black flex-grow" style={{ fontWeight: 900 }}>應付金額 TOTAL</div>
+                           <div className="min-w-[180px] text-right text-3xl font-black text-[#FF4B7D] whitespace-nowrap" style={{ fontWeight: 900, textAlign: 'right' }}>NT$ {totalCalculation.grandTotal.toLocaleString()}</div>
                         </div>
                       </div>
 
@@ -407,9 +397,15 @@ const QuotationSystem: React.FC<QuotationSystemProps> = ({ isOpen, onClose }) =>
                     <div className="mt-6 flex justify-center">
                       <button 
                         onClick={handleDownload}
-                        className="bg-[#F7005A] text-white px-10 py-4 rounded-full font-black flex items-center gap-3 shadow-xl hover:scale-105 active:scale-95 transition-all"
+                        disabled={isDownloading}
+                        className={`bg-[#F7005A] text-white px-10 py-4 rounded-full font-black flex items-center gap-3 shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed min-w-[240px] justify-center`}
                       >
-                        <Download size={22} /> 下載報價單 (PNG)
+                        {isDownloading ? (
+                          <RefreshCw size={22} className="animate-spin" />
+                        ) : (
+                          <Download size={22} />
+                        )}
+                        {isDownloading ? '下載中⋯⋯' : '下載報價單 (PNG)'}
                       </button>
                     </div>
                   </div>
